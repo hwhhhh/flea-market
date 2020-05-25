@@ -17,7 +17,9 @@ public class Comment {
     private long id;
     private long commodityId;
     private long reviewerId;
+    private String reviewerName;
     private int rating;
     private String photoUrl;
     private String comment;
+    private Date createdOn;
 }

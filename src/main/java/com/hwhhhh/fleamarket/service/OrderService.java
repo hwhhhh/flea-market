@@ -12,6 +12,8 @@ import java.util.List;
 public interface OrderService {
     Order createOrder(OrderReq orderReq);
     Order updateOrder(long id, String note);
+    boolean updateStatus(long id, int status);
     void deleteOrder(long id);
-    List<Order> getAllOrderByUserId(long userId);
+    List<Order> getAllByBuyerId(long buyerId);
+    List<Order> getAllBySellerId(long sellerId);
 }

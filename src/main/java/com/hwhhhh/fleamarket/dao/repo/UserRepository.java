@@ -14,4 +14,5 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
     UserEntity findByEmailAndPassword(@Param("email") String email,@Param("password") String password);
     UserEntity findByEmail(@Param("email") String email);
+    List<UserEntity> findAllByRole(int role);
 }

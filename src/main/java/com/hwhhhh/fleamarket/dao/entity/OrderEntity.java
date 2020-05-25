@@ -28,7 +28,8 @@ public class OrderEntity {
     private int num;
     private String note;
     @Column(columnDefinition = "tinyint(1) default 1 comment '0为无效，1为有效'")
-    private int isEffective;
+    private int isEffective = 1;
+    // 订单状态 0为待处理，1为发货中，2为待确认，3为已完成，-1为已取消
     private int status;
     @Temporal(TemporalType.TIMESTAMP)
     @CreationTimestamp

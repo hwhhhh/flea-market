@@ -22,25 +22,17 @@ public class CommodityEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @Column
     private String name;
-    @Column
     private String description;
-    @Column
     private String photoUrl;
-    @Column
     private int quantity;
-    @Column
     private float price;
-    @Column
     private long ownerId;
-    @Column
+    @Column(columnDefinition = "tinyint(1) default 0")
     private int status;
-    @Column
     @Temporal(TemporalType.TIMESTAMP)
     @CreationTimestamp
     private Date createdOn;
-    @Column
     @Temporal(TemporalType.TIMESTAMP)
     @UpdateTimestamp
     private Date modifiedOn;

@@ -10,7 +10,6 @@ import lombok.Data;
 public class OrderReq {
     private long buyerId;
     private long commodityId;
-    private long sellerId;
     private int num;
     private String note;
 }

@@ -1,10 +1,19 @@
 package com.hwhhhh.fleamarket.controller;
 
+import com.hwhhhh.fleamarket.controller.param.CommoStatusReq;
 import com.hwhhhh.fleamarket.controller.param.CommodityReq;
-import com.hwhhhh.fleamarket.pojo.ResponseCode;
-import com.hwhhhh.fleamarket.pojo.ResponseData;
+import com.hwhhhh.fleamarket.domain.model.Commodity;
+import com.hwhhhh.fleamarket.domain.pojo.ResponseCode;
+import com.hwhhhh.fleamarket.domain.pojo.ResponseData;
+import com.hwhhhh.fleamarket.service.CommodityService;
+import com.hwhhhh.fleamarket.utils.ImageUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * @Description detail
@@ -56,12 +65,12 @@ public class CommodityController extends BaseController{
     }
 
     /**
-     * 普通用户获取在售的所有的商品
+     * 获取在售的所有热门的商品 Banner和Common
      * @return
      */
-    @GetMapping("/commodities")
-    public ResponseData getAllCommodity(){
-        return new ResponseData(ResponseCode.SUCCSEE, this.commodityService.getAll());
+    @GetMapping("/commodities/hot")
+    public ResponseData getHotCommodities(){
+        return new ResponseData(ResponseCode.SUCCSEE, this.commodityService.getHomeAll());
     }
 
     /**
@@ -72,5 +81,69 @@ public class CommodityController extends BaseController{
     @GetMapping("/users/{ownerId}/commodities")
     public ResponseData getAllCommodityByUserId(@PathVariable long ownerId) {
         return new ResponseData(ResponseCode.SUCCSEE, this.commodityService.getAllByOwnerId(ownerId));
+    }
+
+    @PostMapping("/commodities/{id}/images")
+    public ResponseData uploadImg(@PathVariable long id, @RequestParam(value = "file") MultipartFile multipartFile) {
+        try {
+            String url = ImageUtil.uploadImg(multipartFile, ImageUtil.COMMODITY_IMG);
+            boolean isSuccessful = this.commodityService.saveImgURL(id, url);
+            if (isSuccessful) {
+                return new ResponseData(ResponseCode.SUCCSEE, url);
+            } else {
+                return new ResponseData(ResponseCode.BAD_REQUEST);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new ResponseData(ResponseCode.BAD_REQUEST);
+        }
+    }
+
+    /**
+     * 根据名称搜索
+     * @param search
+     * @return
+     */
+    @GetMapping("/commodities/search")
+    public ResponseData getCommoditiesByNameLike(@RequestParam("name") String search) {
+        return new ResponseData(ResponseCode.SUCCSEE, this.commodityService.findByNameLike(search));
+    }
+
+    /**
+     * 获取处于审核状态的商品
+     * @return
+     */
+    @GetMapping("/commodities/audit")
+    public ResponseData getCommoditiesInAudit() {
+        return new ResponseData(ResponseCode.SUCCSEE, this.commodityService.getCommoditiesByStatus(CommodityService.STATUS_AUDIT));
+    }
+
+    /**
+     * 设置商品状态
+     * @param id    商品id
+     * @param commoStatusReq 设置状态的请求
+     * @return
+     */
+    @PutMapping("/commodities/{id}/status")
+    public ResponseData setCommodityStatus(@PathVariable long id, @RequestBody CommoStatusReq commoStatusReq) {
+        this.commodityService.updateStatus(id, commoStatusReq.getStatus());
+        return new ResponseData(ResponseCode.SUCCSEE);
+    }
+
+    /**
+     * 获取limit个商品
+     * @param status    商品的状态
+     * @param id    商品的最小id
+     * @param limit     个数
+     * @return  返回结果
+     */
+    @GetMapping("/commodities/status")
+    public ResponseData getCommonCommodities(@RequestParam int status, @RequestParam long id, @RequestParam int limit) {
+        List<Commodity> commodities = this.commodityService.getCommoditiesByStatus(status, id, limit);
+        if (!commodities.isEmpty()) {
+            return new ResponseData(ResponseCode.SUCCSEE, commodities);
+        } else {
+            return new ResponseData(ResponseCode.BAD_REQUEST);
+        }
     }
 }

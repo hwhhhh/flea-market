@@ -13,7 +13,9 @@ public class CommentResp {
     private long id;
     private long commentId;
     private long reviewerId;
+    private String reviewerName;
     private long replierId;
+    private String replierName;
     private long parentId;
     private String comment;
 }

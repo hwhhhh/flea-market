@@ -1,6 +1,7 @@
 package com.hwhhhh.fleamarket.controller.param;
 
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @Description detail
@@ -10,8 +11,8 @@ import lombok.Data;
 public class CommodityReq {
     private String name;
     private String description;
-    private String photoUrl;
     private int quantity;
     private float price;
     private long ownerId;
+    private MultipartFile photo;
 }

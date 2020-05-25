@@ -2,10 +2,12 @@ package com.hwhhhh.fleamarket.controller;
 
 import com.hwhhhh.fleamarket.controller.param.OrderReq;
 import com.hwhhhh.fleamarket.domain.model.Order;
-import com.hwhhhh.fleamarket.pojo.ResponseCode;
-import com.hwhhhh.fleamarket.pojo.ResponseData;
+import com.hwhhhh.fleamarket.domain.pojo.ResponseCode;
+import com.hwhhhh.fleamarket.domain.pojo.ResponseData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @Description detail
@@ -30,12 +32,12 @@ public class OrderController extends BaseController {
     }
 
     /**
-     * 修改订单，一般只需改一些字段因此用patch
+     * 修改订单
      * @param id
-     * @param orderReq
+     * @param note
      * @return
      */
-    @PatchMapping("/orders/{id}")
+    @PutMapping("/orders/{id}")
     public ResponseData updateOrder(@PathVariable long id, @RequestParam("note") String note) {
         Order order = this.orderService.updateOrder(id, note);
         if (order == null) {
@@ -55,8 +57,39 @@ public class OrderController extends BaseController {
         return new ResponseData(ResponseCode.SUCCSEE);
     }
 
-    @GetMapping("/users/{userId}/orders")
-    public ResponseData getAllOrderByUserId(@PathVariable long userId) {
-        return new ResponseData(ResponseCode.SUCCSEE, this.orderService.getAllOrderByUserId(userId));
+    /**
+     * 根据买家id获得订单，即已购买的商品
+     * @param buyerId
+     * @return
+     */
+    @GetMapping("/buyer-orders/{buyerId}")
+    public ResponseData getAllByBuyerId(@PathVariable long buyerId) {
+        return new ResponseData(ResponseCode.SUCCSEE, this.orderService.getAllByBuyerId(buyerId));
+    }
+
+    /**
+     * 用户的订单管理，即卖出去的商品的订单
+     * @param sellerId
+     * @return
+     */
+    @GetMapping("/pending-orders/{sellerId}")
+    public ResponseData getAllBySellerId(@PathVariable long sellerId) {
+        return new ResponseData(ResponseCode.SUCCSEE, this.orderService.getAllBySellerId(sellerId));
+    }
+
+    /**
+     * 改变订单的状态
+     * @param id
+     * @param status
+     * @return
+     */
+    @PutMapping("/pending-orders/{id}")
+    public ResponseData changeStatus(@PathVariable long id, @RequestParam int status) {
+        if (this.orderService.updateStatus(id, status)) {
+            log.info(status + "");
+            return new ResponseData(ResponseCode.SUCCSEE, status);
+        } else {
+            return new ResponseData(ResponseCode.BAD_REQUEST);
+        }
     }
 }

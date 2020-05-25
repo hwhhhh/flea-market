@@ -1,4 +1,4 @@
-package com.hwhhhh.fleamarket.pojo;
+package com.hwhhhh.fleamarket.domain.pojo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,7 +17,6 @@ public class ResponseData {
     public ResponseData(ResponseCode responseCode) {
         this.code = responseCode.getCode();
         this.message = responseCode.getMsg();
-        this.data = "";
     }
 
     public ResponseData(ResponseCode responseCode, Object data) {

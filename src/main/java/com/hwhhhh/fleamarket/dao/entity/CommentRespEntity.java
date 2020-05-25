@@ -24,9 +24,9 @@ public class CommentRespEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private long commentId;
-    private long reviewerId;
-    private long replierId;
-    private long parentId;
+    private long reviewerId;    // 评论者的id
+    private long replierId; // 被回复者的id，若为0，则表示单纯给楼主的评论
+    private long parentId;  // 上级id
     private String comment;
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)

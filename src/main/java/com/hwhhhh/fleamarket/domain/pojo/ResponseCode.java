@@ -1,6 +1,4 @@
-package com.hwhhhh.fleamarket.pojo;
-
-import lombok.Data;
+package com.hwhhhh.fleamarket.domain.pojo;
 
 /**
  * @Description detail

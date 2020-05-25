@@ -4,13 +4,18 @@ import com.hwhhhh.fleamarket.controller.param.CommodityReq;
 import com.hwhhhh.fleamarket.dao.entity.CommodityEntity;
 import com.hwhhhh.fleamarket.dao.repo.CommodityRepository;
 import com.hwhhhh.fleamarket.domain.model.Commodity;
+import com.hwhhhh.fleamarket.domain.pojo.ResponseCode;
+import com.hwhhhh.fleamarket.domain.pojo.ResponseData;
 import com.hwhhhh.fleamarket.service.CommodityService;
+import com.hwhhhh.fleamarket.utils.ImageUtil;
+import com.hwhhhh.fleamarket.views.HomeVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +32,7 @@ public class CommodityServiceImpl implements CommodityService {
     @Override
     public Commodity createCommodity(CommodityReq commodityReq) {
         CommodityEntity commodityEntity = new CommodityEntity();
+        commodityEntity.setStatus(-1);
         return save(commodityReq, commodityEntity);
     }
 
@@ -80,7 +86,7 @@ public class CommodityServiceImpl implements CommodityService {
      */
     @Override
     public List<Commodity> findByNameLike(String name) {
-        List<CommodityEntity> entities = this.commodityRepository.findByNameLike(name);
+        List<CommodityEntity> entities = this.commodityRepository.findByNameLikeAndStatusNot("%" + name + "%", -1);
         List<Commodity> commodities = entities.stream().map(entity -> {
             Commodity commodity = new Commodity();
             BeanUtils.copyProperties(entity, commodity);
@@ -90,22 +96,33 @@ public class CommodityServiceImpl implements CommodityService {
     }
 
     /**
-     * 获取所有商品
+     * 获取所有热门商品
      * @return
      */
     @Override
-    public List<Commodity> getAll() {
-        List<CommodityEntity> entities = this.commodityRepository.findAll();
+    public HomeVO getHomeAll() {
+        HomeVO homeVO = new HomeVO();
+        //查找热门商品 Banner
+        List<CommodityEntity> entities = this.commodityRepository.findAllByStatus(STATUS_BANNER);
         List<Commodity> commodities = entities.stream().map(entity -> {
             Commodity commodity = new Commodity();
             BeanUtils.copyProperties(entity, commodity);
             return commodity;
         }).collect(Collectors.toList());
-        return commodities;
+        //查找普通热门商品 Hot
+        List<CommodityEntity> entities1 = this.commodityRepository.findAllByStatus(STATUS_HOT);
+        List<Commodity> commodities1 = entities1.stream().map(entity -> {
+            Commodity commodity = new Commodity();
+            BeanUtils.copyProperties(entity, commodity);
+            return commodity;
+        }).collect(Collectors.toList());
+        homeVO.setBannerList(commodities);
+        homeVO.setHotList(commodities1);
+        return homeVO;
     }
 
     @Override
-    public int updateQuantity(long id, int num) {
+    public long updateQuantity(long id, int num) {
         try {
             CommodityEntity entity = this.commodityRepository.getOne(id);
             int quantity = entity.getQuantity();
@@ -115,12 +132,55 @@ public class CommodityServiceImpl implements CommodityService {
                 }
                 entity.setQuantity(quantity-num);
                 this.commodityRepository.save(entity);
-                return quantity - num;
+                return entity.getOwnerId();
             }
             return -1;  //如果不够返回-1
         } catch (Exception e) {
             e.printStackTrace();
             return -1;
         }
+    }
+
+    @Override
+    public boolean saveImgURL(long id, String url) {
+        CommodityEntity entity = this.commodityRepository.getOne(id);
+        entity.setPhotoUrl(url);
+        this.commodityRepository.save(entity);
+        return true;
+    }
+
+    /**
+     * 获取某种状态的商品
+     * @param status 0 为默认已发布，-1为审核中， 1为热门商品， 2为banner中的商品
+     * @return
+     */
+    @Override
+    public List<Commodity> getCommoditiesByStatus(int status) {
+        List<CommodityEntity> entities = this.commodityRepository.findAllByStatus(status);
+        List<Commodity> commodities = entities.stream().map(entity -> {
+            Commodity commodity = new Commodity();
+            BeanUtils.copyProperties(entity, commodity);
+            return commodity;
+        }).collect(Collectors.toList());
+        return commodities;
+    }
+
+    @Override
+    public boolean updateStatus(long id, int status) {
+        CommodityEntity entity = this.commodityRepository.getOne(id);
+        entity.setStatus(status);
+        this.commodityRepository.save(entity);
+        return true;
+    }
+
+    @Override
+    public List<Commodity> getCommoditiesByStatus(int status, long id, int limit) {
+        List<CommodityEntity> entities = this.commodityRepository.findAllByStatusLimit(status, id, limit);
+        List<Commodity> commodities = entities.stream().map(entity -> {
+            Commodity commodity = new Commodity();
+            BeanUtils.copyProperties(entity, commodity);
+            return commodity;
+        }).collect(Collectors.toList());
+        return commodities;
     }
 }

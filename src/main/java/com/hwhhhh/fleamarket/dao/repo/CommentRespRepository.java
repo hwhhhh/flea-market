@@ -13,6 +13,5 @@ import java.util.List;
  * Created by Hwhhhh on 2020/5/8 16:47
  */
 public interface CommentRespRepository extends JpaRepository<CommentRespEntity, Long> {
-
     List<CommentRespEntity> findAllByCommentId(long id);
 }
